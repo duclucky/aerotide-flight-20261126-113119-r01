@@ -64,6 +64,10 @@ function openFlightDeck() {
       return;
     }
     if(chart.visible && action!=='idle') return;
+    if(action==='aid'){
+      if(sortie.id==='courier') hud.toggleAid();
+      return;
+    }
     if(action==='mute'){
       hud.setSound(radio.toggle());return;
     }
@@ -92,7 +96,7 @@ function openFlightDeck() {
     }
   }
 
-  const input=connectPilotControls(viewport,handleCommand);
+  const input=connectPilotControls(viewport,handleCommand,()=>flight.grounded && sortie.status==='active');
   function suspendControls() {
     input.clear();
     frameBudget=0;
@@ -108,6 +112,10 @@ function openFlightDeck() {
   for(const [id,action] of [['help','pause'],['sound','mute'],['camera','camera'],['restart','restart']]){
     query(id).addEventListener('click',()=>{handleCommand(action);query(id).blur();});
   }
+  query('aid-toggle').addEventListener('click',event=>{
+    handleCommand('aid');
+    if(event.detail>0) event.currentTarget.blur();
+  });
   query('action').addEventListener('click',()=>{
     if(sortie.status==='paused') handleCommand('pause');
     else if(sortie.status==='ready') handleCommand('launch');

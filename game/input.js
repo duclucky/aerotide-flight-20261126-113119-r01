@@ -1,9 +1,9 @@
 
-export function connectPilotControls(field,command) {
+export function connectPilotControls(field,command,brakeOverridesButton) {
   const keys=new Set();
   const captured=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
-    'ShiftLeft','ShiftRight','ControlLeft','ControlRight','Space','KeyF','KeyM','KeyR','Escape','KeyC','KeyN']);
-  let stick=null,wheel=0;
+    'ShiftLeft','ShiftRight','ControlLeft','ControlRight','Space','KeyF','KeyM','KeyR','Escape','KeyC','KeyN','KeyG']);
+  let stick=null,wheel=0,brakingSpace=false;
   const limit=value=>Math.max(-1,Math.min(1,value));
   const clear=()=>{keys.clear();stick=null;wheel=0;field.classList.remove('steering');};
   window.addEventListener('blur',clear);
@@ -12,15 +12,25 @@ export function connectPilotControls(field,command) {
     if(event.altKey || event.metaKey || (event.ctrlKey && !event.code.startsWith('Control') &&
       !['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.code))) return;
     if(event.target.closest?.('dialog[open]') && event.code!=='KeyN') return;
-    if(!captured.has(event.code) || (event.target.closest?.('button') && event.code==='Space')) return;
+    if(!captured.has(event.code)) return;
+    if(event.code==='Space') {
+      if(!event.repeat) brakingSpace=brakeOverridesButton();
+      if(event.target.closest?.('button') && !brakingSpace) return;
+    }
     event.preventDefault();
     keys.add(event.code);
     if(event.repeat) return;
-    const actions={KeyF:'flaps',KeyM:'mute',KeyR:'restart',Escape:'pause',KeyC:'camera',KeyN:'chart',Space:'launch'};
+    const actions={KeyF:'flaps',KeyM:'mute',KeyR:'restart',Escape:'pause',KeyC:'camera',KeyN:'chart',KeyG:'aid',Space:'launch'};
     if(actions[event.code]) command(actions[event.code]);
     else if(!event.target.closest?.('button')) command('steer');
   });
-  window.addEventListener('keyup',event=>keys.delete(event.code));
+  window.addEventListener('keyup',event=>{
+    keys.delete(event.code);
+    if(event.code==='Space' && brakingSpace){
+      event.preventDefault();
+      brakingSpace=false;
+    }
+  });
   field.addEventListener('pointerdown',event=>{
     if(event.button!==0) return;
     stick={id:event.pointerId,homeX:event.clientX,homeY:event.clientY,x:0,y:0};

@@ -1,8 +1,9 @@
 
 import * as T from './vendor/three.module.min.js';
-import {compassDegrees,signedAngle} from './flight.js';
+import {compassDegrees,horizonRollDegrees,signedAngle} from './flight.js';
 import {SORTIES,bearingToTarget,targetForSortie} from './missions.js';
 import {STRIP} from './airspace.js';
+import {readApproach,rangeToThreshold} from './approach.js';
 
 const item=id=>document.getElementById(id);
 const put=(el,value)=>{if(el.textContent!==String(value)) el.textContent=value;};
@@ -44,29 +45,48 @@ function drawLocalizer(ctx,flight,sortie,target) {
   ctx.fillStyle='#e7fff4';ctx.fill();
 }
 
-function landingInstruction(flight,sortie) {
+function essentialLandingCall(flight,sortie) {
   if(flight.grounded) return 'HOLD SPACE TO BRAKE';
   if(sortie.id!=='courier') return '';
   if(sortie.index===0 && !flight.flaps && flight.z>=SORTIES.courier.gates[0].z)
     return 'SET FLAPS [F] · STAY LEVEL THROUGH GATE';
   if(sortie.index!==1) return '';
   if(Math.abs(flight.x-STRIP.x)>17 || Math.abs(signedAngle(flight.heading))>.19)
-    return 'LINE UP WITH RUNWAY 36';
-  if(flight.y<=10.2 && flight.z<STRIP.near+10 && flight.z>STRIP.far)
+    return '';
+  if(flight.y<=10.2 && flight.z<STRIP.near+10 && flight.z>STRIP.near-145)
     return 'FLARE NOW · RELEASE S / DOWN';
-  if(flight.y<19 && flight.z<92 && flight.z>STRIP.far)
+  if(flight.y<19 && flight.z<92 && flight.z>STRIP.near-145)
     return 'AT 32 FT · RELEASE S / DOWN TO FLARE';
-  return 'DESCEND [S / DOWN] · AIM AT THE CENTERLINE';
+  return '';
 }
 
 export function bindFlightInstruments() {
   const ids=['speed','altitude','heading','cardinal','vertical','flight-config','attitude','marker','caution',
     'flight-number','mission-title','objective','progress','progress-label','radio','flight-time',
     'scope','target-range','scope-label','power','fuel','hull','power-value','fuel-value','hull-value',
-    'status-panel','status-tag','status-title','status-copy','action','route','courier','help','sound','camera','review-flight'];
+    'status-panel','status-tag','status-title','status-copy','action','route','courier','help','sound','camera','review-flight',
+    'aid-toggle','aid','aid-phase','aid-range','aid-readings','aid-course','aid-path','aid-speed','aid-hint'];
   const e=Object.fromEntries(ids.map(id=>[id,item(id)]));
   const ctx=e.scope.getContext('2d'), vector=new T.Vector3();
   let lastStage='',lastIndex=-1,lastMission='';
+  let aidEnabled=true;
+  function updateApproach(flight,sortie,primary,report) {
+    e['aid-toggle'].hidden=sortie.id!=='courier';
+    e.aid.hidden=!aidEnabled || !report;
+    if(e.aid.hidden) return;
+    const {phase,distance,course,vertical,airspeed,hint}=report;
+    put(e['aid-phase'],phase);
+    put(e['aid-range'],rangeToThreshold(distance));
+    e['aid-readings'].hidden=!course;
+    if(course) {
+      put(e['aid-course'],course);
+      put(e['aid-path'],vertical);
+      put(e['aid-speed'],airspeed);
+    }
+    // Never present secondary instructions alongside a primary cockpit call.
+    e['aid-hint'].hidden=!!primary;
+    if(!primary) put(e['aid-hint'],hint);
+  }
   function showStage(sortie) {
     const stage=sortie.status;
     const stageChanged=stage!==lastStage || sortie.id!==lastMission;
@@ -108,9 +128,15 @@ export function bindFlightInstruments() {
         put(e[id+'-value'],pct(value)+'%');
       }
       const radioCall=flight.seconds<sortie.noticeUntil?sortie.notice:'';
-      const info=flight.warning || (radioCall.includes('MISSED')?radioCall:landingInstruction(flight,sortie) || radioCall);
+      const primary=flight.warning || (radioCall.includes('MISSED')?radioCall:essentialLandingCall(flight,sortie));
+      const report=readApproach(flight,sortie);
+      const fallback=!aidEnabled && report?.course
+        ? report.course!=='CENTERED'?'LINE UP WITH RUNWAY 36':'DESCEND [S / DOWN] · AIM AT THE CENTERLINE'
+        : '';
+      const info=primary || fallback || radioCall;
       e.caution.hidden=!info || sortie.status!=='active';
       if(info) put(e.caution,info);
+      updateApproach(flight,sortie,primary,report);
       if(lastIndex!==sortie.index || lastMission!==sortie.id){
         put(e['flight-number'],'SORTIE '+config.number);
         put(e['mission-title'],config.label);
@@ -140,7 +166,7 @@ export function bindFlightInstruments() {
       return {target,relative};
     },
     situate(flight,target,relative,camera,w,h){
-      e.attitude.style.rotate=(-flight.bank*19).toFixed(1)+'deg';
+      e.attitude.querySelector('.ladder').style.rotate=horizonRollDegrees(flight.bank).toFixed(1)+'deg';
       if(!target){e.marker.hidden=true;return;}
       vector.set(target.x,target.y+(target.r?target.r+8:8),target.z).project(camera);
       const inFront=Math.abs(relative)<1.52;
@@ -162,6 +188,11 @@ export function bindFlightInstruments() {
     setCamera(wide){
       e.camera.setAttribute('aria-pressed',String(wide));
       e.camera.lastChild.textContent=wide?' Wide':' Chase';
+    },
+    toggleAid(){
+      aidEnabled=!aidEnabled;
+      e['aid-toggle'].setAttribute('aria-pressed',String(aidEnabled));
+      if(!aidEnabled) e.aid.hidden=true;
     }
   };
 }

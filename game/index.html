@@ -41,6 +41,7 @@
         <button id="route" class="tab" type="button" aria-pressed="true"><b>01</b> Circuit</button>
         <button id="courier" class="tab" type="button" aria-pressed="false"><b>02</b> Courier</button>
       </div>
+      <button id="aid-toggle" type="button" aria-controls="aid" aria-pressed="true" hidden><kbd>G</kbd> Approach aid</button>
     </nav>
   </header>
 
@@ -63,6 +64,17 @@
   </svg></div>
   <div id="marker" class="target-marker" aria-hidden="true"><span></span></div>
   <div id="caution" role="status" class="caution" hidden></div>
+
+  <section id="aid" class="approach-aid" aria-label="Advisory runway approach information" hidden>
+    <header><span>RWY 36 / ADVISORY</span><span id="aid-range"></span></header>
+    <div id="aid-phase"></div>
+    <dl id="aid-readings" hidden>
+      <div><dt>COURSE</dt><dd id="aid-course"></dd></div>
+      <div><dt>GLIDE</dt><dd id="aid-path"></dd></div>
+      <div><dt>SPEED</dt><dd id="aid-speed"></dd></div>
+    </dl>
+    <p id="aid-hint"></p>
+  </section>
 
   <section class="brief" aria-labelledby="mission-title">
     <div class="brief-top micro"><i></i><span id="flight-number">SORTIE 01</span><span class="brief-code">AT / 07</span></div>

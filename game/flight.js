@@ -7,6 +7,7 @@ export const clamp=(value,low,high)=>Math.max(low,Math.min(high,value));
 const ease=(from,to,rate,dt)=>from+(to-from)*(1-Math.exp(-rate*dt));
 export const signedAngle=angle=>((angle+Math.PI)%TAU+TAU)%TAU-Math.PI;
 export const compassDegrees=heading=>(Math.round(heading*180/Math.PI)+360)%360;
+export const horizonRollDegrees=bank=>-bank*180/Math.PI;
 
 export function launchAircraft(mission) {
   const supply=mission==='courier';

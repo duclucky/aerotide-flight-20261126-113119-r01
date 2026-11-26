@@ -22,6 +22,7 @@ From the repository root, run `python -m http.server 8080 --bind 127.0.0.1 --dir
 | Hold Space on the runway | Brake |
 | Esc / C / M / R | Pause / switch chase camera / toggle sound / restart |
 | N or Chart | Open the north-up mission chart and suspend flight |
+| G or Approach aid | Show or hide the Courier's advisory director |
 
 ### Beacon Circuit
 
@@ -30,6 +31,8 @@ Fly through all four beacons in order. Only the current beacon counts; if you mi
 ### Last Light Delivery
 
 Set flaps with **F** before starting. Stay level until **LANDING CLEARED**. Stay on heading **000°** and aim along Runway 36's centerline at **55–85 kt**. On the default approach, hold **S** to descend; release it at about **32 ft indicated** to arrest the descent. Keep the wings level. Once **ON RUNWAY** appears, hold **Space** to brake and secure the cargo.
+
+The approach aid reports meters before or past the threshold. After gate clearance its advisory glide line runs from the default **161 ft** crossing altitude to **32 ft** about **45 m** into the strip (roughly 1 m down per 6 m traveled). This is a game-specific reference, not an autopilot or a terrain-clearance guarantee. Follow the primary flare, stall and braking calls first; climb and rejoin the approach if you pass the usable zone.
 
 ## Chart and flight debrief
 
