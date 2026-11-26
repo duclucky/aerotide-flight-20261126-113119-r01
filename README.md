@@ -21,6 +21,7 @@ From the repository root, run `python -m http.server 8080 --bind 127.0.0.1 --dir
 | F | Toggle flaps |
 | Hold Space on the runway | Brake |
 | Esc / C / M / R | Pause / switch chase camera / toggle sound / restart |
+| N or Chart | Open the north-up mission chart and suspend flight |
 
 ### Beacon Circuit
 
@@ -30,9 +31,13 @@ Fly through all four beacons in order. Only the current beacon counts; if you mi
 
 Set flaps with **F** before starting. Stay level until **LANDING CLEARED**. Stay on heading **000°** and aim along Runway 36's centerline at **55–85 kt**. On the default approach, hold **S** to descend; release it at about **32 ft indicated** to arrest the descent. Keep the wings level. Once **ON RUNWAY** appears, hold **Space** to brake and secure the cargo.
 
+## Chart and flight debrief
+
+Open **Debrief** after a flight to see the route you actually flew, gate splits, fuel used (percentage points), hull condition, and runway contact readings if you touched down. The flight deck keeps four recent results and the fastest successful time per mission in this browser. If storage is blocked, records last for the current page session. There is no online leaderboard.
+
 ## Package the entry
 
-Run `node main.ts` with Node.js 22.18 or later. It copies the game and browser captures and writes the make.fun dossier. The grader uses `/output`; for a local run set `MAKEFUN_OUTPUT_DIR` to a fresh empty directory.
+Run `node main.ts --output-dir <path>` with Node.js 22.18 or later. It copies the game and browser captures and writes the make.fun dossier to a fresh empty directory. Without the flag, the command uses `MAKEFUN_OUTPUT_DIR` or defaults to the grader's `/output`. See `node main.ts --help`.
 
 ## Credits and license
 

@@ -93,6 +93,7 @@
     <h2 id="status-title">Ready to fly</h2>
     <p id="status-copy">The coast is clear. Take the controls.</p>
     <button type="button" id="action"><kbd>SPACE</kbd><span>Take controls</span></button>
+    <button type="button" id="review-flight" aria-haspopup="dialog" hidden>Debrief</button>
   </section>
 
   <footer class="command-strip" aria-label="Flight controls">
@@ -103,6 +104,7 @@
       <span class="mouse-hint">Drag to fly · Wheel for power</span>
     </div>
     <div class="actions">
+      <button id="chart-button" type="button" aria-haspopup="dialog" aria-controls="mission-chart" aria-expanded="false"><kbd>N</kbd> Chart</button>
       <button id="sound" type="button" aria-pressed="false"><kbd>M</kbd> Sound off</button>
       <button id="camera" type="button" aria-pressed="false"><kbd>C</kbd> Chase</button>
       <button id="restart" type="button"><kbd>R</kbd> Restart</button>
@@ -112,6 +114,42 @@
   <div id="graphics-error" role="alert" hidden>
     <h2>Flight deck unavailable</h2><p>This game needs WebGL 2. Enable graphics acceleration or try a current desktop Chromium browser.</p>
   </div>
+  <dialog id="mission-chart" aria-labelledby="chart-title">
+    <header class="chart-header">
+      <div>
+        <div class="micro chart-kicker" id="chart-kicker"></div>
+        <h2 id="chart-title">Mission chart</h2>
+        <p id="chart-subtitle"></p>
+      </div>
+      <button type="button" id="close-chart" autofocus>Close <kbd>ESC</kbd></button>
+    </header>
+    <div class="chart-body">
+      <section class="chart-map" aria-label="Navigation plot">
+        <svg id="chart-plot" viewBox="0 0 600 422" role="img" aria-label="North-up map of the route, gates, Runway 36 and flown trail"></svg>
+        <ul class="chart-key" aria-label="Map key">
+          <li><i class="legend-next"></i> Next gate</li>
+          <li><i class="legend-cleared"></i> Cleared</li>
+          <li><i class="legend-track"></i> Flown trail</li>
+          <li><i class="legend-plan"></i> Planned route</li>
+        </ul>
+      </section>
+      <aside class="chart-summary" aria-label="Flight log">
+        <dl class="chart-metrics">
+          <div><dt>Progress</dt><dd id="chart-progress"></dd></div>
+          <div><dt>Elapsed</dt><dd id="chart-time"></dd></div>
+          <div><dt>Fuel used</dt><dd id="chart-fuel"></dd></div>
+          <div><dt>Hull</dt><dd id="chart-hull"></dd></div>
+          <div><dt>Distance</dt><dd id="chart-distance"></dd></div>
+        </dl>
+        <p class="chart-guidance" id="chart-feedback"></p>
+        <p id="chart-contact" hidden></p>
+        <h3>Gate splits</h3><ol id="chart-splits"></ol>
+        <h3 id="chart-record-mode">Local records</h3>
+        <p id="chart-best"></p>
+        <ul id="chart-ledger"></ul>
+      </aside>
+    </div>
+  </dialog>
 </main>
 <script type="module" src="./aerotide.js"></script>
 </body>

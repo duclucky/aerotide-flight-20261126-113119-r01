@@ -98,6 +98,57 @@ kbd{font:700 10px var(--mono);padding:2px 4px;border:1px solid currentColor;whit
 .primary-keys kbd,.actions kbd{color:var(--gold);margin-right:3px}
 .actions button{padding:7px 8px;font-size:12px;min-height:32px}
 #graphics-error{position:absolute;left:50%;top:50%;translate:-50% -50%;background:var(--panel);border:1px solid var(--gold);padding:18px;max-width:min(90vw,450px)}
+#review-flight,#close-chart{border:1px solid var(--line);background:#22373d;padding:7px 10px;font-size:13px;font-weight:700}
+#review-flight{margin-left:5px}
+#mission-chart{color:var(--ink);background:#142930;border:1px solid #547467;border-top:3px solid var(--gold);padding:0;width:min(950px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 18px 78px #0a171bd9}
+#mission-chart::backdrop{background:#0b1723bf}
+.chart-header{display:flex;justify-content:space-between;align-items:start;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.chart-header h2{font-size:clamp(23px,4vw,35px);line-height:1.05;margin:5px 0}
+.chart-header p{margin:0;color:var(--soft);font-size:14px}
+.chart-kicker{color:var(--gold)}
+#close-chart{flex:none;min-height:38px}
+#close-chart kbd{margin-left:3px;color:var(--gold)}
+.chart-body{display:grid;grid-template-columns:minmax(0,1.84fr) minmax(240px,1fr);gap:16px;padding:16px 20px 20px}
+.chart-map{min-width:0}
+#chart-plot{display:block;width:100%;height:auto;background:#192f36;border:1px solid var(--line)}
+.chart-grid{stroke:#38545a;stroke-width:1}
+.chart-land{fill:#314a46;stroke:#557466;stroke-width:1}
+.chart-plan{fill:none;stroke:#e6c487;stroke-width:2;stroke-dasharray:6 5}
+.chart-trail{fill:none;stroke:#99efc6;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.chart-runway{stroke:#c5c8b2;stroke-width:7;stroke-dasharray:8 3}
+.chart-threshold{stroke:#d2d9c5;stroke-width:1.5}
+.chart-gate{stroke:#aeb9ab;stroke-width:1.5;fill:#24373c}
+.chart-gate.current{fill:#715a33;stroke:#ffe3ac;stroke-width:2.5}
+.chart-gate.cleared{fill:#31564c;stroke:#b9f3d6}
+.chart-gate-number,.plot-label{fill:#f5edda;font:700 14px var(--mono)}
+.chart-gate-number{text-anchor:middle}
+.plot-label{stroke:#172b31;stroke-width:4;paint-order:stroke}
+.plot-label.align-left{text-anchor:end}
+.chart-plane{fill:#fff7de;stroke:#112b2a;stroke-width:1.5}
+.chart-key{display:flex;flex-wrap:wrap;gap:6px 13px;list-style:none;padding:0;margin:9px 0 0;font-size:12px;color:var(--soft)}
+.chart-key li{display:flex;align-items:center;gap:5px}
+.chart-key i{display:block;width:13px;height:5px;background:#b9f3d6}
+.chart-key .legend-next{background:#ffe3ac}
+.chart-key .legend-cleared{background:#629f85}
+.chart-key .legend-plan{background:transparent;border-top:1px dashed #e6c487}
+.chart-summary{border-left:1px solid var(--line);padding-left:15px;min-width:0}
+.chart-metrics{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
+.chart-metrics>div{padding:5px 0;border-bottom:1px solid var(--line)}
+.chart-metrics dt,.chart-summary h3{font:700 11px var(--mono);color:var(--gold);text-transform:uppercase;letter-spacing:.08em}
+.chart-metrics dd{font:700 17px var(--mono);margin:3px 0 0}
+.chart-summary p{margin:7px 0;color:var(--soft);font-size:13px;line-height:1.35}
+.chart-summary h3{margin:12px 0 5px}
+.chart-summary ul,.chart-summary ol{padding:0;list-style:none;margin:0;color:var(--soft);font:12px/1.45 var(--mono)}
+#chart-splits li{display:flex;justify-content:space-between;gap:5px}
+#chart-best{color:var(--mint);font-weight:700}
+@media(max-width:680px){
+  .chart-body{grid-template-columns:1fr;padding:12px;gap:13px}
+  .chart-header{padding:12px}
+  .chart-summary{border-left:0;border-top:1px solid var(--line);padding:10px 0 0}
+  #chart-plot{width:auto;max-width:100%;height:min(40dvh,300px);margin-inline:auto}
+  .plot-label{font-size:19px}
+  #review-flight{font-size:12px;padding:6px}
+}
 @media(max-width:970px){.mouse-hint{display:none}.brief{width:224px}.systems{width:172px}.gauges{left:4%;right:4%}}
 @media(max-width:720px){
   .mast,.command-strip{left:12px;right:12px}.mast{top:13px;grid-template-columns:1fr auto}

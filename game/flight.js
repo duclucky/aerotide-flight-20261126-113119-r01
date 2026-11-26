@@ -18,13 +18,16 @@ export function launchAircraft(mission) {
   };
 }
 
-function resolveTouchdown(flight,formerHeight) {
+function resolveTouchdown(flight,formerHeight,observeContact) {
   const {x,z,pitch,bank,heading,speed,sink}=flight;
   const land=groundAt(x,z), road=onRunway(x,z);
   const floor=(road?STRIP.level:land)+GEAR_HEIGHT;
   if(flight.y>floor) return null;
   flight.y=floor;
   if(!road) return land<.08?'Water impact':'Terrain impact';
+  observeContact?.({
+    speed, sink, bank, heading:signedAngle(heading), pitch, offset:x-STRIP.x
+  });
   if(Math.abs(signedAngle(heading))>=.19) return 'Runway alignment lost';
   if(Math.abs(bank)>=.22 || pitch<=-.15 || pitch>=.22 ||
     speed>=47 || speed<=23 || sink>6.2 || formerHeight<floor-.5) return 'Hard landing';
@@ -35,7 +38,7 @@ function resolveTouchdown(flight,formerHeight) {
   return null;
 }
 
-export function advanceFlight(flight,input,dt) {
+export function advanceFlight(flight,input,dt,observeContact) {
   if(!flight.intact) return null;
   flight.seconds+=dt;
   const {flaps}=flight;
@@ -63,5 +66,5 @@ export function advanceFlight(flight,input,dt) {
   flight.z-=Math.cos(flight.heading)*flight.speed*dt;
   flight.warning=flight.fuel<=0?'FUEL EXHAUSTED':stall>.23?'STALL · LOWER NOSE':flight.fuel<.18?'LOW FUEL':'';
   if(Math.hypot(flight.x,flight.z)>3900) return 'Beyond the radio sector';
-  return resolveTouchdown(flight,oldHeight);
+  return resolveTouchdown(flight,oldHeight,observeContact);
 }

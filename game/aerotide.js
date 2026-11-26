@@ -8,6 +8,8 @@ import {SORTIES,startSortie,updateSortie} from './missions.js';
 import {connectPilotControls} from './input.js';
 import {bindFlightInstruments} from './hud.js';
 import {buildRadioSound} from './audio.js';
+import {beginFlightLog,openPilotRecords} from './flight-log.js';
+import {connectMissionChart} from './mission-chart.js';
 
 function openFlightDeck() {
   const viewport=document.getElementById('viewport');
@@ -29,6 +31,8 @@ function openFlightDeck() {
   const gates=Object.fromEntries(Object.entries(SORTIES).map(([id,config])=>[id,config.gates.map(gate=>buildBeaconGate(scene,gate))]));
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let flight=launchAircraft('route'),sortie=startSortie('route');
+  let log=beginFlightLog(flight,SORTIES.route.gates.length);
+  const records=openPilotRecords();
   let width=1,height=1,last=0,simTime=0,elapsed=0,frameBudget=0;
   const before={x:0,y:0,z:0};
   const fixedStep=1/100;
@@ -45,6 +49,7 @@ function openFlightDeck() {
   function chooseSortie(id,active=false) {
     flight=launchAircraft(id);
     sortie=startSortie(id);
+    log=beginFlightLog(flight,SORTIES[id].gates.length);
     sortie.status=active?'active':'ready';
     input.clear();
     view.reset();
@@ -53,6 +58,12 @@ function openFlightDeck() {
 
   function handleCommand(action) {
     const stage=sortie.status;
+    if(action==='chart'){
+      if(chart.visible) chart.close();
+      else chart.open();
+      return;
+    }
+    if(chart.visible && action!=='idle') return;
     if(action==='mute'){
       hud.setSound(radio.toggle());return;
     }
@@ -82,6 +93,15 @@ function openFlightDeck() {
   }
 
   const input=connectPilotControls(viewport,handleCommand);
+  function suspendControls() {
+    input.clear();
+    frameBudget=0;
+  }
+  const chart=connectMissionChart({
+    snapshot:()=>({flight,sortie,log,records}),
+    onOpen:suspendControls,
+    onClose:suspendControls
+  });
   for(const id of Object.keys(SORTIES)) query(id).addEventListener('click',()=>{
     chooseSortie(id);query(id).blur();
   });
@@ -100,12 +120,14 @@ function openFlightDeck() {
     while(frameBudget>=fixedStep && sortie.status==='active'){
       frameBudget-=fixedStep;
       before.x=flight.x;before.y=flight.y;before.z=flight.z;
-      const failure=advanceFlight(flight,input.read(fixedStep),fixedStep);
+      const failure=advanceFlight(flight,input.read(fixedStep),fixedStep,log.contact);
       const progress=sortie.index;
       const success=failure?null:updateSortie(sortie,before,flight);
+      log.sample(flight,sortie.index,!!(failure || success));
       if(failure || success){
         sortie.status=failure?'failure':'success';sortie.reason=failure??success;
         if(failure){flight.damage=1;flight.intact=false;flight.bank=Math.sign(flight.bank||1)*.38;}
+        records.record(sortie.id,log.summary(flight,sortie));
         radio.signal(sortie.status);
         input.clear();
       }else if(progress!==sortie.index){
@@ -124,8 +146,8 @@ function openFlightDeck() {
   function render(now) {
     const dt=last?Math.min(.082,Math.max(0,(now-last)*.001)):0;
     last=now;
-    if(sortie.status==='active') runSimulation(dt);
-    if(!reduced.matches && !['paused','failure'].includes(sortie.status)) simTime+=dt;
+    if(sortie.status==='active' && !chart.visible) runSimulation(dt);
+    if(!chart.visible && !reduced.matches && !['paused','failure'].includes(sortie.status)) simTime+=dt;
     model(flight,simTime);
     view.follow(flight,dt);
     coast(view.camera,simTime);
@@ -135,7 +157,7 @@ function openFlightDeck() {
       readings=hud.update(flight,sortie);elapsed=0;
     }
     hud.situate(flight,readings.target,readings.relative,view.camera,width,height);
-    radio.drive(flight,sortie.status==='active');
+    radio.drive(flight,sortie.status==='active' && !chart.visible);
     renderer.render(scene,view.camera);
   }
   renderer.setAnimationLoop(render);

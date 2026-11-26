@@ -13,9 +13,22 @@ const CAPS = {
 };
 
 const source = fileURLToPath(new URL('.', import.meta.url));
-const output = resolve(process.env.MAKEFUN_OUTPUT_DIR || '/output');
-const game = readGameTree(join(source, 'game'), CAPS);
 const screenshots = join(source, 'screenshots');
+
+function parseDeliveryArgs(args: string[]) {
+  let outputDir: string | undefined;
+  let help = false;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--help') help = true;
+    else if (arg === '--output-dir' && outputDir === undefined) {
+      const path = args[++i];
+      if (!path?.trim() || path.startsWith('-')) throw new Error('--output-dir requires a path argument.');
+      outputDir = path;
+    } else throw new Error('Unknown or repeated argument: ' + arg);
+  }
+  return { help, outputDir };
+}
 
 function listCaptures() {
   if (!lstatSync(screenshots).isDirectory()) throw new Error('Expected a plain screenshots directory.');
@@ -31,7 +44,8 @@ function listCaptures() {
   return names;
 }
 
-function copyDeliverables(captures: string[]) {
+function copyDeliverables(output: string, captures: string[]) {
+  const game = readGameTree(join(source, 'game'), CAPS);
   mkdirSync(output, { recursive: true });
   if (readdirSync(output).length !== 0) throw new Error('Choose an empty output directory.');
   for (const name of ['game','screenshots']) mkdirSync(join(output,name));
@@ -42,7 +56,22 @@ function copyDeliverables(captures: string[]) {
     copyFileSync(join(screenshots,name),join(output,'screenshots',name),constants.COPYFILE_EXCL);
 }
 
-copyDeliverables(listCaptures());
-const dossier = buildDossier(output, CAPS);
-if (dossier.byteLength > 1572864) throw new Error('Dossier exceeds the competition limit.');
-writeFileSync(join(output,'dossier.json'),dossier,{flag:'wx'});
+function deliver(args: string[]) {
+  const { help, outputDir } = parseDeliveryArgs(args);
+  if (help) {
+    console.log('Usage: node main.ts [--output-dir <path>] [--help]\nCopies the game and captures and writes dossier.json to a fresh empty directory.\nDefaults to MAKEFUN_OUTPUT_DIR, or /output if unset.');
+    return;
+  }
+  const output = resolve(outputDir ?? (process.env.MAKEFUN_OUTPUT_DIR || '/output'));
+  copyDeliverables(output, listCaptures());
+  const dossier = buildDossier(output, CAPS);
+  if (dossier.byteLength > 1572864) throw new Error('Dossier exceeds the competition limit.');
+  writeFileSync(join(output,'dossier.json'),dossier,{flag:'wx'});
+}
+
+try {
+  deliver(process.argv.slice(2));
+} catch (error) {
+  console.error('Aerotide delivery: ' + (error instanceof Error ? error.message : String(error)));
+  process.exitCode = 1;
+}

@@ -63,7 +63,7 @@ export function bindFlightInstruments() {
   const ids=['speed','altitude','heading','cardinal','vertical','flight-config','attitude','marker','caution',
     'flight-number','mission-title','objective','progress','progress-label','radio','flight-time',
     'scope','target-range','scope-label','power','fuel','hull','power-value','fuel-value','hull-value',
-    'status-panel','status-tag','status-title','status-copy','action','route','courier','help','sound','camera'];
+    'status-panel','status-tag','status-title','status-copy','action','route','courier','help','sound','camera','review-flight'];
   const e=Object.fromEntries(ids.map(id=>[id,item(id)]));
   const ctx=e.scope.getContext('2d'), vector=new T.Vector3();
   let lastStage='',lastIndex=-1,lastMission='';
@@ -72,6 +72,7 @@ export function bindFlightInstruments() {
     const stageChanged=stage!==lastStage || sortie.id!==lastMission;
     if(!stageChanged) return;
     e['status-panel'].hidden=stage==='active';
+    e['review-flight'].hidden=stage!=='success' && stage!=='failure';
     e['status-panel'].className='status-panel '+stage;
     e.help.setAttribute('aria-expanded',String(stage==='paused'));
     const labels={
