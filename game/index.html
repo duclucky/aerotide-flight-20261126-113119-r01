@@ -1,0 +1,118 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#162831">
+<title>Aerotide — Last Light Courier</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23162831'/%3E%3Cpath d='m5 22 11-15 11 15-11-5z' fill='%23ffd49a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./instruments.css">
+</head>
+<body>
+<main id="flight-deck" aria-label="Aerotide flight simulator">
+  <div id="viewport" aria-label="3D chase view. Drag to steer." role="img"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="mast">
+    <div class="identity">
+      <svg class="squadron" viewBox="0 0 42 42" aria-hidden="true">
+        <path d="M21 3 37 12v18L21 39 5 30V12Z" fill="none" stroke="currentColor"/>
+        <path d="m9 27 12-15 12 15-12-5Z" fill="currentColor"/>
+        <path d="M11 31h20" stroke="currentColor"/>
+      </svg>
+      <div>
+        <h1>AEROTIDE<span>.</span></h1>
+        <p>LAST LIGHT COURIER</p>
+      </div>
+    </div>
+
+    <div id="heading-instrument" class="heading-instrument readout">
+      <div class="micro">MAG HEADING</div>
+      <div class="heading-line"><span id="heading">000</span><sup>°</sup><span id="cardinal">N</span></div>
+      <div class="compass-track" aria-hidden="true">
+        <div class="tick-rail"></div><i></i>
+      </div>
+    </div>
+
+    <nav class="sorties" aria-label="Select a mission">
+      <span class="micro">FLIGHT ASSIGNMENTS</span>
+      <div class="flight-tabs">
+        <button id="route" class="tab" type="button" aria-pressed="true"><b>01</b> Circuit</button>
+        <button id="courier" class="tab" type="button" aria-pressed="false"><b>02</b> Courier</button>
+      </div>
+    </nav>
+  </header>
+
+  <section class="gauges" aria-label="Flight instruments">
+    <div class="readout gauge speed">
+      <span class="micro">AIRSPEED</span>
+      <div class="number"><output id="speed">103</output><small>KT</small></div>
+      <div id="flight-config" class="micro detail">CLEAN CONFIG</div>
+    </div>
+    <div class="readout gauge altitude">
+      <span class="micro">ALTITUDE</span>
+      <div class="number"><output id="altitude">308</output><small>FT</small></div>
+      <div class="micro detail"><span id="vertical">0</span> FPM</div>
+    </div>
+  </section>
+
+  <div id="attitude" aria-hidden="true"><svg viewBox="0 0 184 72">
+    <path class="ladder" d="M64 13h17m22 0h17M51 59h16m50 0h16"/>
+    <path d="M2 36h53l8 8h14m30 0h14l8-8h53M92 33v7m-4-3h8" />
+  </svg></div>
+  <div id="marker" class="target-marker" aria-hidden="true"><span></span></div>
+  <div id="caution" role="status" class="caution" hidden></div>
+
+  <section class="brief" aria-labelledby="mission-title">
+    <div class="brief-top micro"><i></i><span id="flight-number">SORTIE 01</span><span class="brief-code">AT / 07</span></div>
+    <h2 id="mission-title">Beacon Circuit</h2>
+    <p id="objective">Thread four tide beacons through the island channel.</p>
+    <div class="progress-row">
+      <div id="progress" class="progress" aria-hidden="true"></div>
+      <span id="progress-label">0 / 4 GATES</span>
+    </div>
+    <div class="brief-bottom"><span id="radio">LUMEN CONTROL</span><span id="flight-time">00:00</span></div>
+  </section>
+
+  <section class="systems" aria-label="Aircraft systems and navigation">
+    <div class="radar">
+      <div class="radar-top micro"><span>LOCALIZER</span><span id="target-range">0.14 NM</span></div>
+      <canvas id="scope" width="244" height="116" role="img" aria-label="Local navigation plot"></canvas>
+      <div class="radar-footer" id="scope-label">BREAKWATER</div>
+    </div>
+    <div class="systems-bars">
+      <div><span class="micro">PWR</span><meter id="power" min="0" max="100" value="54"></meter><output id="power-value">54%</output></div>
+      <div><span class="micro">FUEL</span><meter id="fuel" min="0" max="100" value="89"></meter><output id="fuel-value">89%</output></div>
+      <div><span class="micro">HULL</span><meter id="hull" min="0" max="100" value="100"></meter><output id="hull-value">100%</output></div>
+    </div>
+  </section>
+
+  <section id="status-panel" class="status-panel" aria-labelledby="status-title" aria-live="polite">
+    <div id="status-tag" class="micro">KESTREL ARCHIPELAGO · 18:42 LOCAL</div>
+    <h2 id="status-title">Ready to fly</h2>
+    <p id="status-copy">The coast is clear. Take the controls.</p>
+    <button type="button" id="action"><kbd>SPACE</kbd><span>Take controls</span></button>
+  </section>
+
+  <footer class="command-strip" aria-label="Flight controls">
+    <div class="primary-keys">
+      <span><kbd>W A S D</kbd> Steer</span>
+      <span><kbd>SHIFT / CTRL</kbd> Power</span>
+      <span><kbd>F</kbd> Flaps</span>
+      <span class="mouse-hint">Drag to fly · Wheel for power</span>
+    </div>
+    <div class="actions">
+      <button id="sound" type="button" aria-pressed="false"><kbd>M</kbd> Sound off</button>
+      <button id="camera" type="button" aria-pressed="false"><kbd>C</kbd> Chase</button>
+      <button id="restart" type="button"><kbd>R</kbd> Restart</button>
+      <button id="help" type="button" aria-expanded="false"><kbd>ESC</kbd> Briefing</button>
+    </div>
+  </footer>
+  <div id="graphics-error" role="alert" hidden>
+    <h2>Flight deck unavailable</h2><p>This game needs WebGL 2. Enable graphics acceleration or try a current desktop Chromium browser.</p>
+  </div>
+</main>
+<script type="module" src="./aerotide.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+
+vendor/makefun-game.ts -text
+game/vendor/*.min.js -text
+game/vendor/THREE-LICENSE.txt -text
